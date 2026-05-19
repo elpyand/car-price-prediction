@@ -1,13 +1,39 @@
 import streamlit as st
 import pandas as pd
-import pickle
+import numpy as np
 
-# =========================
-# LOAD MODEL
-# =========================
-with open("car_price_model.pkl", "rb") as file:
-    model = pickle.load(file)
+from sklearn.linear_model import LinearRegression
 
+@st.cache_resource
+def train_model():
+    df = pd.read_excel("Car_sales.xlsx")
+
+    df = df.dropna(subset=["Price_in_thousands"])
+
+    fitur_model = [
+        "Engine_size",
+        "Horsepower",
+        "Wheelbase",
+        "Width",
+        "Length",
+        "Curb_weight",
+        "Fuel_capacity",
+        "Fuel_efficiency",
+        "Power_perf_factor"
+    ]
+
+    for col in fitur_model:
+        df[col] = df[col].fillna(df[col].median())
+
+    X = df[fitur_model]
+    y = df["Price_in_thousands"]
+
+    model = LinearRegression()
+    model.fit(X, y)
+
+    return model
+
+model = train_model()
 # =========================
 # PAGE CONFIG
 # =========================
